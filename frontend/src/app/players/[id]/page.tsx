@@ -1,5 +1,5 @@
 'use client';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Player, PlayerStat, ScoreEvent } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,8 +8,8 @@ import Link from 'next/link';
 import { User, Edit2, Save, X, Trophy, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 
-export default function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function PlayerDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const { canEdit } = useAuth();
   const [player, setPlayer] = useState<Player | null>(null);
   const [stats, setStats] = useState<PlayerStat[]>([]);
@@ -209,8 +209,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                   {ev.description && <div className="text-xs text-gray-500">{ev.description}</div>}
                 </div>
                 <div className="text-xs text-gray-400 text-right">
-                  <div>{ev.home_team} {ev.score_home} – {ev.score_away} {ev.away_team}</div>
-                  <div>{ev.scheduled_at ? format(new Date(ev.scheduled_at), 'dd MMM yyyy') : ''}</div>
+                  <div>{ev.score_home_at_event} – {ev.score_away_at_event}</div>
                 </div>
               </div>
             ))}

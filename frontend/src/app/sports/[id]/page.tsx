@@ -1,5 +1,5 @@
 'use client';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Sport, Team, Match } from '@/types';
 import Link from 'next/link';
@@ -7,8 +7,8 @@ import Image from 'next/image';
 import MatchCard from '@/components/MatchCard';
 import { Users, ArrowRight } from 'lucide-react';
 
-export default function SportDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function SportDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const [sport, setSport] = useState<Sport | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);

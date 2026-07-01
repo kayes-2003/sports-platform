@@ -11,12 +11,15 @@ export interface User {
   created_at: string;
 }
 
+export type ResultFormat = 'goals' | 'points' | 'runs_wickets' | 'sets';
+
 export interface Sport {
   id: string;
   name: string;
   description?: string;
   logo_url?: string;
   scoring_unit: string;
+  result_format?: ResultFormat;  // ← added: used by MatchResultForm to show correct fields
   team_count?: number;
   player_count?: number;
   created_at: string;
@@ -69,6 +72,7 @@ export interface Match {
   sport_name?: string;
   sport_logo?: string;
   scoring_unit?: string;
+  result_format?: ResultFormat;   // ← added: joined from sports
   team_home_id: string;
   home_name?: string;
   home_logo?: string;
@@ -83,8 +87,29 @@ export interface Match {
   winner_team_id?: string;
   winner_name?: string;
   notes?: string;
+  // ── result detail fields (set after match completes via PATCH /result) ──
+  result_summary?: string | null;
+  man_of_the_match_id?: string | null;
+  man_of_the_match_name?: string | null;
+  best_scorer_id?: string | null;
+  best_scorer_name?: string | null;
+  best_scorer_value?: number | null;
+  extra_result_data?: Record<string, unknown>;
+  tournament_match_id?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface MatchDetail extends Match {
+  // Populated by GET /matches/:id/details (richer than GET /matches/:id)
+  home_team_name: string;
+  away_team_name: string;
+}
+
+export interface MatchDetailsResponse {
+  match: MatchDetail;
+  events: ScoreEvent[];
+  top_scorers: Array<{ player_name: string; count: number }>;
 }
 
 export interface ScoreEvent {
@@ -132,8 +157,13 @@ export interface LeaderboardEntry {
   wins: number;
 }
 
-// ── TOURNAMENTS ──────────────────────────────────────────────
-export type TournamentFormat = 'single_elimination' | 'double_elimination' | 'round_robin' | 'group_knockout';
+// ── TOURNAMENTS ──────────────────────────────────────────────────────────────
+export type TournamentFormat =
+  | 'single_elimination'
+  | 'double_elimination'
+  | 'round_robin'
+  | 'group_knockout';
+
 export type TournamentStatus = 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
 
 export interface Tournament {
@@ -149,6 +179,8 @@ export interface Tournament {
   venue?: string;
   description?: string;
   prize?: string;
+  group_count?: number;
+  teams_advance_per_group?: number;
   team_count?: number;
   created_at: string;
   updated_at: string;
@@ -162,35 +194,47 @@ export interface TournamentTeam {
   team_logo?: string;
   seed: number;
   group_name?: string;
+  // standings (round_robin / group stage)
+  played: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  points: number;
+  goal_diff?: number;
 }
 
+// BracketMatch matches the shape returned by GET /tournaments/:id
+// and expected by tournamentsApi.setResult
 export interface BracketMatch {
   id: string;
   tournament_id: string;
   round_id: string;
   round_number: number;
   round_name: string;
-  match_id?: string;
+  bracket_side?: string;
+  match_id?: string | null;
   slot_number: number;
-  team_home_id?: string;
-  home_name?: string;
-  home_logo?: string;
-  team_away_id?: string;
-  away_name?: string;
-  away_logo?: string;
-  winner_id?: string;
-  winner_name?: string;
-  score_home?: number;
-  score_away?: number;
-  match_status?: string;
-  scheduled_at?: string;
-  venue?: string;
-  next_match_slot?: number;
+  group_name?: string | null;
+  team_home_id?: string | null;
+  home_name?: string | null;
+  home_logo?: string | null;
+  team_away_id?: string | null;
+  away_name?: string | null;
+  away_logo?: string | null;
+  winner_id?: string | null;
+  winner_name?: string | null;
+  score_home?: number | null;
+  score_away?: number | null;
+  match_status: 'pending' | 'ready' | 'live' | 'completed' | 'bye';
+  scheduled_at?: string | null;
+  venue?: string | null;
+  next_match_slot?: number | null;
 }
 
 export interface BracketRound {
   id: string;
   round_number: number;
   round_name: string;
+  bracket_side?: string;
   matches: BracketMatch[];
 }

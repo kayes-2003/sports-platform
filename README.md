@@ -1,33 +1,54 @@
 # University Central Sports Platform
 
-A full-stack live sports update platform built with Next.js + Node.js + PostgreSQL + Socket.io.
+A full-stack live sports update platform built with **Next.js + Node.js + Neon (PostgreSQL) + Socket.io**.
 
-## Quick Start
+---
+
+## ⚡ Quick Start
+
+### Step 0 — Create your Neon project
+
+1. Go to [neon.tech](https://neon.tech) → **Sign up free** → **Create a project**
+2. Choose a name and region
+3. On the project dashboard, find **Connection string**
+4. Toggle **"Pooled connection"** ON (important for serverless/Express apps)
+5. Copy the URI — you'll need it below
+
+---
 
 ### 1. Backend setup
 
 ```bash
 cd backend
-npm install          # installs all dependencies
+npm install
 ```
 
-Copy and fill in your environment variables:
-```bash
-# Edit backend/.env with your actual values:
-# - DATABASE_URL  → your PostgreSQL connection string
-# - JWT_SECRET    → any long random string
-# - CLOUDINARY_*  → from cloudinary.com (free account)
+Create `backend/.env` and fill in your values:
+
+```env
+DATABASE_URL=postgresql://neondb_owner:[YOUR-PASSWORD]@[YOUR-PROJECT].neon.tech/neondb?sslmode=require
+JWT_SECRET=any_long_random_string
+PORT=4000
+NODE_ENV=development
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+CLIENT_URL=http://localhost:3000
 ```
 
-Initialize database (creates tables + seeds 6 sports + admin user):
+Initialize database (creates all tables + seeds 6 sports + admin user):
+
 ```bash
-npm run db:init
+npm run db:init  ###connecting with database
 ```
 
 Start the server:
+
 ```bash
 npm run dev       # runs on http://localhost:4000
 ```
+
+---
 
 ### 2. Frontend setup
 
@@ -36,55 +57,78 @@ cd frontend
 npm install
 ```
 
-Create `.env.local` in the frontend folder:
-```
+Create `frontend/.env.local`:
+
+```env
 NEXT_PUBLIC_API_URL=http://localhost:4000/api
 NEXT_PUBLIC_SOCKET_URL=http://localhost:4000
 ```
 
 Start the frontend:
+
 ```bash
 npm run dev       # runs on http://localhost:3000
 ```
 
+---
+
 ### 3. Default login
 
-| Role  | Email               | Password   |
-|-------|---------------------|------------|
-| Admin | admin@sports.edu    | admin123   |
+| Role  | Email             | Password  |
+|-------|-------------------|-----------|
+| Admin | admin@sports.edu  | admin123  |
 
 ---
 
-## Prerequisites
+## 🔧 Prerequisites
 
 - Node.js v18+
-- PostgreSQL 14+ (local or cloud like Neon/Supabase)
-- Cloudinary account (free tier works fine)
+- A free [Neon](https://neon.tech) account (serverless PostgreSQL)
+- A free [Cloudinary](https://cloudinary.com) account (image uploads)
 
 ---
 
-## Project Structure
+## 🆓 Other free PostgreSQL-compatible options (if Neon doesn't fit)
+
+| Provider | Free tier notes |
+|---|---|
+| **Neon** (used here) | Generous free tier, instant branching, true serverless Postgres, auto-sleeps when idle |
+| **Supabase** | Free Postgres + built-in auth/storage if you want an all-in-one BaaS later |
+| **Railway** | Free trial credits, simple Postgres + easy backend hosting in one place |
+| **Render** | Free Postgres tier (expires after 90 days, then needs a paid plan) |
+| **ElephantSQL** | Tiny free "Tiny Turtle" plan (20MB) — fine for testing only, not real use |
+
+Since this app already uses a plain `pg` Pool with a `DATABASE_URL`, switching providers later is just swapping the connection string in `backend/.env` — no code changes needed.
+
+---
+
+## 📁 Project Structure
 
 ```
 sports-platform/
 ├── backend/
+│   ├── .env                        ← your secrets (never commit)
 │   └── src/
-│       ├── config/       # DB pool, Cloudinary, DB init/seed
-│       ├── controllers/  # Auth, Sports, Teams, Players, Matches, Insights, Users
-│       ├── middleware/   # JWT auth, role guards
-│       └── routes/       # Express routers
+│       ├── config/
+│       │   ├── db.js               ← Neon pg pool
+│       │   ├── dbInit.js           ← table creation + seeding
+│       │   └── cloudinary.js       ← image upload config
+│       ├── controllers/            ← Auth, Sports, Teams, Players, Matches, Insights, Users
+│       ├── middleware/             ← JWT auth, role guards
+│       └── routes/                 ← Express routers
 └── frontend/
+    ├── .env.local                  ← frontend env (never commit)
     └── src/
-        ├── app/          # Next.js 14 App Router pages
-        ├── components/   # Navbar, MatchCard
-        ├── hooks/        # useAuth, useLiveMatch (Socket.io)
-        ├── lib/          # API client, socket singleton
-        └── types/        # TypeScript types
+        ├── app/                    ← Next.js 14 App Router pages
+        ├── components/             ← Navbar, MatchCard
+        ├── hooks/                  ← useAuth, useLiveMatch (Socket.io)
+        ├── lib/                    ← API client, socket singleton
+        └── types/                  ← TypeScript types
 ```
 
 ---
 
-## Pages
+## 🌐 Pages
 
 | Route | Description |
 |---|---|
@@ -107,13 +151,11 @@ sports-platform/
 
 ---
 
-## GitHub Push (first time)
+## 🐙 GitHub Push (first time fix)
 
-If you get a "large file" error from GitHub, it's because `node_modules` was accidentally added.
-Run these commands to fix it:
+If you get a "large file" error, run `fix-github-push.bat` (Windows) or:
 
 ```bash
-# From the root sports-platform folder:
 git rm -r --cached .
 git add .
 git commit -m "fix: remove node_modules from tracking"

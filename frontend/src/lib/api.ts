@@ -123,7 +123,45 @@ export const tournamentsApi = {
   removeTeam: (id: string, teamId: string) =>
     request<{ message: string }>(`/tournaments/${id}/teams/${teamId}`, { method: 'DELETE' }),
   generateBracket: (id: string) =>
-    request<{ bracket: import('@/types').BracketRound[] }>(`/tournaments/${id}/generate-bracket`, { method: 'POST' }),
+    request<{ tournament: import('@/types').Tournament; teams: import('@/types').TournamentTeam[]; bracket: import('@/types').BracketRound[] }>(`/tournaments/${id}/generate-bracket`, { method: 'POST' }),
   setResult: (id: string, matchId: string, data: Record<string, unknown>) =>
     request<{ message: string }>(`/tournaments/${id}/bracket/${matchId}/result`, { method: 'POST', body: JSON.stringify(data) }),
+};
+
+// Match details — man of the match, best scorer, sport-aware result summary
+export const matchDetailsApi = {
+  getDetails: (matchId: string) =>
+    request<{
+      match: import('@/types').Match & {
+        sport_name: string;
+        result_format: 'goals' | 'points' | 'runs_wickets' | 'sets';
+        home_team_name: string;
+        away_team_name: string;
+        result_summary: string | null;
+        man_of_the_match_id: string | null;
+        man_of_the_match_name: string | null;
+        best_scorer_id: string | null;
+        best_scorer_name: string | null;
+        best_scorer_value: number | null;
+        extra_result_data: Record<string, unknown>;
+      };
+      events: import('@/types').ScoreEvent[];
+      top_scorers: Array<{ player_name: string; count: number }>;
+    }>(`/matches/${matchId}/details`),
+
+  updateResult: (
+    matchId: string,
+    data: {
+      score_home: number;
+      score_away: number;
+      man_of_the_match_id?: string;
+      best_scorer_id?: string;
+      best_scorer_value?: number;
+      extra_result_data?: Record<string, unknown>;
+    }
+  ) =>
+    request<{ match: import('@/types').Match; result_summary: string }>(`/matches/${matchId}/result`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
 };

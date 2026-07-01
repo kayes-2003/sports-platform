@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { use } from 'react';
 import { api } from '@/lib/api';
 import { Match, ScoreEvent, Player } from '@/types';
 import { useLiveMatch } from '@/hooks/useLiveMatch';
@@ -9,15 +8,14 @@ import { format } from 'date-fns';
 import Image from 'next/image';
 import { MapPin, Clock, Wifi, WifiOff, Plus, Minus, CheckCircle } from 'lucide-react';
 
-export default function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function MatchDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const { canEdit } = useAuth();
   const [initialMatch, setInitialMatch] = useState<Match | null>(null);
   const [initialEvents, setInitialEvents] = useState<ScoreEvent[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Score update form state
   const [scoreHome, setScoreHome] = useState(0);
   const [scoreAway, setScoreAway] = useState(0);
   const [eventType, setEventType] = useState('goal');
@@ -29,7 +27,6 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
 
-  // Live hook
   const { match, events: liveEvents, connected } = useLiveMatch(id, initialMatch);
   const allEvents = [...initialEvents, ...liveEvents].filter(
     (e, i, arr) => arr.findIndex((x) => x.id === e.id) === i
@@ -41,7 +38,6 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
       setInitialEvents(d.events);
       setScoreHome(d.match.score_home);
       setScoreAway(d.match.score_away);
-      // Load players for both teams
       return Promise.all([
         api.players.list({ team_id: d.match.team_home_id }),
         api.players.list({ team_id: d.match.team_away_id }),
@@ -92,7 +88,6 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
     <div className="card text-center py-16 text-gray-400">Match not found.</div>
   );
 
-  const isLiveOrUpcoming = match.status === 'live' || match.status === 'upcoming';
   const homePlayers = players.filter((p) => p.team_id === match.team_home_id);
   const awayPlayers = players.filter((p) => p.team_id === match.team_away_id);
 
@@ -113,7 +108,9 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
             <span className="badge bg-yellow-100 text-yellow-700">Cancelled</span>
           )}
           <span className="ml-auto flex items-center gap-1 text-xs text-gray-400">
-            {connected ? <><Wifi className="w-3 h-3 text-green-500" />Live</> : <><WifiOff className="w-3 h-3" />Offline</>}
+            {connected
+              ? <><Wifi className="w-3 h-3 text-green-500" />Live</>
+              : <><WifiOff className="w-3 h-3" />Offline</>}
           </span>
         </div>
 
@@ -155,7 +152,6 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
 
-        {/* Match info */}
         <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-400">
           {match.venue && (
             <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{match.venue}</span>
@@ -174,11 +170,9 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
       {canEdit && (
         <div className="card border-brand-100">
           <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Wifi className="w-4 h-4 text-brand-600" />
-            Update Score
+            <Wifi className="w-4 h-4 text-brand-600" />Update Score
           </h3>
 
-          {/* Status control */}
           <div className="flex gap-2 mb-4 flex-wrap">
             {['upcoming', 'live', 'completed', 'cancelled'].map((s) => (
               <button key={s}
@@ -193,7 +187,6 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
             ))}
           </div>
 
-          {/* Score inputs */}
           <div className="grid grid-cols-2 gap-6 mb-4">
             <div>
               <label className="label">{match.home_name} (Home)</label>
@@ -227,7 +220,6 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
             </div>
           </div>
 
-          {/* Event logging */}
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
               <label className="label">Event type</label>
@@ -267,11 +259,13 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                 onChange={(e) => setMinute(e.target.value)} placeholder="e.g. 45" />
             </div>
           </div>
+
           <div className="mb-3">
             <label className="label">Event description</label>
             <input type="text" className="input" value={eventDesc}
               onChange={(e) => setEventDesc(e.target.value)} placeholder="e.g. Header from corner kick" />
           </div>
+
           <div className="flex items-center gap-3">
             <label className="flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" checked={markComplete}
@@ -283,6 +277,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
               {saving ? 'Saving…' : 'Push Score Update'}
             </button>
           </div>
+
           {saveMsg && (
             <div className={`mt-2 text-sm flex items-center gap-1 ${saveMsg.startsWith('Error') ? 'text-red-600' : 'text-green-600'}`}>
               <CheckCircle className="w-4 h-4" />{saveMsg}
@@ -311,7 +306,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-semibold text-gray-800">{ev.event_type.replace('_', ' ')}</span>
+                    <span className="text-sm font-semibold text-gray-800 capitalize">{ev.event_type.replace('_', ' ')}</span>
                     <span className="text-xs text-gray-400">{ev.team_name}</span>
                     {ev.player_name && (
                       <span className="text-xs bg-white border border-gray-200 px-1.5 py-0.5 rounded text-gray-600">{ev.player_name}</span>
