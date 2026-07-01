@@ -1,22 +1,4 @@
 'use client';
-
-/**
- * AnimatedLogo — JUsports
- * On mount, plays a one-time sequence where sport equipment animates in:
- *   1. Football flies in from the left, spinning
- *   2. Cricket bat swings and "hits" a ball which flies off
- *   3. Badminton shuttle drops and bounces
- *   4. Basketball bounces in from the right
- * Then the wordmark "JUsports" types/fades in, and the whole thing
- * settles into a small idle state (ball gently bobbing).
- *
- * Pure CSS keyframe animation — no JS animation libraries needed.
- * Respects prefers-reduced-motion (falls back to a simple fade-in).
- *
- * Usage: <AnimatedLogo /> — drop into your Navbar component.
- * Size controlled via the `size` prop (default 40 = 40px tall).
- */
-
 interface Props {
   size?: number;
   className?: string;

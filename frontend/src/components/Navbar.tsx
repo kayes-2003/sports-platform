@@ -37,7 +37,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 font-bold text-brand-600 text-lg">
             <Trophy className="w-5 h-5" />
-            UniSports
+            JUSports
           </Link>
 
           {/* Desktop nav links */}
