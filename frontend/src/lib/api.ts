@@ -1,4 +1,6 @@
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const BASE = typeof window === 'undefined'
+  ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api')
+  : (process.env.NEXT_PUBLIC_API_URL || '/api');
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null;
@@ -102,7 +104,6 @@ export const api = {
   },
 };
 
-// Tournaments
 export const tournamentsApi = {
   list: (params?: { sport_id?: string; status?: string }) => {
     const q = new URLSearchParams(params as Record<string, string>).toString();
@@ -128,7 +129,6 @@ export const tournamentsApi = {
     request<{ message: string }>(`/tournaments/${id}/bracket/${matchId}/result`, { method: 'POST', body: JSON.stringify(data) }),
 };
 
-// Match details — man of the match, best scorer, sport-aware result summary
 export const matchDetailsApi = {
   getDetails: (matchId: string) =>
     request<{
