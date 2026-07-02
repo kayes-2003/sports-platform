@@ -2,11 +2,12 @@
   "name": "sports-platform-backend",
   "version": "1.0.0",
   "type": "commonjs",
+  "main": "src/index.js",
   "scripts": {
     "dev": "npx nodemon src/index.js",
     "db:init": "node src/config/initDb.js",
-    "build": "node index.js",
-    "start": "node index.js"
+    "build": "echo 'No build step required'",
+    "start": "node src/index.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
