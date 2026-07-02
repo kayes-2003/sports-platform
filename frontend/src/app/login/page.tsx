@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { Trophy, Eye, EyeOff, User, Mail, Lock } from 'lucide-react';
 
+
 type Tab = 'signin' | 'signup';
 
 export default function AuthPage() {
