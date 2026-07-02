@@ -7,18 +7,19 @@ const cors = require('cors');
 const app = express();
 const server = http.createServer(app);
 
-// Allow both :3000 and :3001 (Next.js sometimes uses either)
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
+  'https://sports-platform-eight.vercel.app',
+  'https://sports-platform-qbxi.vercel.app',
   process.env.CLIENT_URL,
 ].filter(Boolean);
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
+    if (origin.includes('sports-platform') && origin.includes('vercel.app')) return callback(null, true);
     callback(new Error(`CORS blocked: ${origin}`));
   },
   credentials: true,
@@ -26,7 +27,12 @@ const corsOptions = {
 
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      if (origin.includes('sports-platform') && origin.includes('vercel.app')) return callback(null, true);
+      callback(new Error(`CORS blocked: ${origin}`));
+    },
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -34,22 +40,10 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
   console.log(`🔌 Socket connected: ${socket.id}`);
-
-  socket.on('join_match', (matchId) => {
-    socket.join(`match:${matchId}`);
-  });
-
-  socket.on('join_sport', (sportId) => {
-    socket.join(`sport:${sportId}`);
-  });
-
-  socket.on('leave_match', (matchId) => {
-    socket.leave(`match:${matchId}`);
-  });
-
-  socket.on('disconnect', () => {
-    console.log(`🔌 Socket disconnected: ${socket.id}`);
-  });
+  socket.on('join_match', (matchId) => { socket.join(`match:${matchId}`); });
+  socket.on('join_sport', (sportId) => { socket.join(`sport:${sportId}`); });
+  socket.on('leave_match', (matchId) => { socket.leave(`match:${matchId}`); });
+  socket.on('disconnect', () => { console.log(`🔌 Socket disconnected: ${socket.id}`); });
 });
 
 app.use(cors(corsOptions));
