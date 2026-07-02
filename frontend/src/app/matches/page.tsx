@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { Match, Sport } from '@/types';
@@ -14,7 +14,7 @@ const STATUS_TABS = [
   { label: 'Completed', value: 'completed' },
 ];
 
-export default function MatchesPage() {
+function MatchesContent() {
   const searchParams = useSearchParams();
   const [matches, setMatches] = useState<Match[]>([]);
   const [sports, setSports] = useState<Sport[]>([]);
@@ -52,9 +52,7 @@ export default function MatchesPage() {
         <p className="text-gray-500 text-sm mt-1">Browse all matches — live, scheduled, and completed</p>
       </div>
 
-      {/* Filters */}
       <div className="card p-3 flex flex-col sm:flex-row gap-3">
-        {/* Status tabs */}
         <div className="flex gap-1 flex-wrap">
           {STATUS_TABS.map((tab) => (
             <button key={tab.value}
@@ -68,7 +66,6 @@ export default function MatchesPage() {
             </button>
           ))}
         </div>
-        {/* Sport filter */}
         <select
           className="input sm:w-48 ml-auto"
           value={sportId}
@@ -80,7 +77,6 @@ export default function MatchesPage() {
         </select>
       </div>
 
-      {/* Results */}
       {loading ? (
         <div className="grid md:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map((i) => (
@@ -99,5 +95,20 @@ export default function MatchesPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function MatchesPage() {
+  return (
+    <Suspense fallback={
+      <div className="space-y-6">
+        <div className="card h-10 animate-pulse bg-gray-100" />
+        <div className="grid md:grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map((i) => <div key={i} className="card animate-pulse h-36 bg-gray-100" />)}
+        </div>
+      </div>
+    }>
+      <MatchesContent />
+    </Suspense>
   );
 }

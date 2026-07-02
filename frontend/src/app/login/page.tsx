@@ -1,13 +1,12 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { Trophy, Eye, EyeOff, User, Mail, Lock } from 'lucide-react';
 
-
 type Tab = 'signin' | 'signup';
 
-export default function AuthPage() {
+function AuthContent() {
   const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>('signin');
   const [showPw, setShowPw] = useState(false);
@@ -17,7 +16,6 @@ export default function AuthPage() {
   const { login } = useAuth();
   const router = useRouter();
 
-  // Read ?tab=signup from URL (e.g. from navbar Sign Up button)
   useEffect(() => {
     if (searchParams.get('tab') === 'signup') setTab('signup');
   }, [searchParams]);
@@ -39,42 +37,41 @@ export default function AuthPage() {
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError(''); setSuccess('');
-  if (signUpForm.password !== signUpForm.confirmPassword) {
-    setError('Passwords do not match'); return;
-  }
-  if (signUpForm.password.length < 6) {
-    setError('Password must be at least 6 characters'); return;
-  }
-  setLoading(true);
-  try {
-    const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-    const res = await fetch(`${BASE}/auth/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: signUpForm.name,
-        email: signUpForm.email,
-        password: signUpForm.password,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Registration failed');
-    setSuccess('Account created successfully! You can now sign in.');
-    setTab('signin');
-    setSignInForm({ email: signUpForm.email, password: '' });
-    setSignUpForm({ name: '', email: '', password: '', confirmPassword: '' });
-  } catch (err: any) {
-    setError(err.message || 'Registration failed');
-  } finally { setLoading(false); }
-};
+    e.preventDefault();
+    setError(''); setSuccess('');
+    if (signUpForm.password !== signUpForm.confirmPassword) {
+      setError('Passwords do not match'); return;
+    }
+    if (signUpForm.password.length < 6) {
+      setError('Password must be at least 6 characters'); return;
+    }
+    setLoading(true);
+    try {
+      const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+      const res = await fetch(`${BASE}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: signUpForm.name,
+          email: signUpForm.email,
+          password: signUpForm.password,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Registration failed');
+      setSuccess('Account created successfully! You can now sign in.');
+      setTab('signin');
+      setSignInForm({ email: signUpForm.email, password: '' });
+      setSignUpForm({ name: '', email: '', password: '', confirmPassword: '' });
+    } catch (err: any) {
+      setError(err.message || 'Registration failed');
+    } finally { setLoading(false); }
+  };
 
   return (
     <div className="min-h-[75vh] flex items-center justify-center">
       <div className="w-full max-w-md">
         <div className="card shadow-lg">
-          {/* Logo */}
           <div className="text-center mb-6">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-100 text-brand-600 mb-3">
               <Trophy className="w-7 h-7" />
@@ -83,7 +80,6 @@ export default function AuthPage() {
             <p className="text-sm text-gray-500 mt-1">University Central Sports Platform</p>
           </div>
 
-          {/* Tabs */}
           <div className="flex rounded-xl bg-gray-100 p-1 mb-6">
             {(['signin', 'signup'] as Tab[]).map(t => (
               <button key={t}
@@ -98,7 +94,6 @@ export default function AuthPage() {
             ))}
           </div>
 
-          {/* Alerts */}
           {error && (
             <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-100 text-red-700 text-sm flex items-center gap-2">
               ⚠️ {error}
@@ -110,7 +105,6 @@ export default function AuthPage() {
             </div>
           )}
 
-          {/* Sign In */}
           {tab === 'signin' && (
             <form onSubmit={handleSignIn} className="space-y-4">
               <div>
@@ -151,7 +145,6 @@ export default function AuthPage() {
             </form>
           )}
 
-          {/* Sign Up */}
           {tab === 'signup' && (
             <form onSubmit={handleSignUp} className="space-y-4">
               <div>
@@ -216,7 +209,6 @@ export default function AuthPage() {
             </form>
           )}
 
-          {/* Demo creds */}
           <div className="mt-5 pt-4 border-t border-gray-100 text-xs text-gray-400 text-center space-y-0.5">
             <div>Demo admin: <strong>admin@sports.edu</strong> / <strong>admin123</strong></div>
             <div>Demo helper: <strong>helper@sports.edu</strong> / <strong>helper123</strong></div>
@@ -224,5 +216,13 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[75vh] flex items-center justify-center"><div className="card w-full max-w-md h-96 animate-pulse bg-gray-100" /></div>}>
+      <AuthContent />
+    </Suspense>
   );
 }

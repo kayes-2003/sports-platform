@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { Sport, LeaderboardEntry, TeamStat } from '@/types';
@@ -12,7 +12,7 @@ import { User } from 'lucide-react';
 
 const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
-export default function InsightsPage() {
+function InsightsContent() {
   const searchParams = useSearchParams();
   const [sports, setSports] = useState<Sport[]>([]);
   const [selectedSport, setSelectedSport] = useState(searchParams.get('sport_id') || '');
@@ -110,7 +110,6 @@ export default function InsightsPage() {
 
           {selectedSport && standings.length > 0 && (
             <>
-              {/* Team Standings Bar Chart */}
               <div className="card">
                 <h2 className="section-title">Team Standings — Wins</h2>
                 <ResponsiveContainer width="100%" height={260}>
@@ -126,7 +125,6 @@ export default function InsightsPage() {
                 </ResponsiveContainer>
               </div>
 
-              {/* Win distribution Pie Chart */}
               {pieData.some((d) => d.value > 0) && (
                 <div className="card">
                   <h2 className="section-title">Win Distribution</h2>
@@ -144,7 +142,6 @@ export default function InsightsPage() {
                 </div>
               )}
 
-              {/* Monthly activity */}
               {monthlyData.length > 0 && (
                 <div className="card">
                   <h2 className="section-title">Monthly Match Activity</h2>
@@ -161,7 +158,6 @@ export default function InsightsPage() {
                 </div>
               )}
 
-              {/* Standings table */}
               <div className="card">
                 <h2 className="section-title">Full Standings Table</h2>
                 <div className="overflow-x-auto">
@@ -206,5 +202,13 @@ export default function InsightsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function InsightsPage() {
+  return (
+    <Suspense fallback={<div className="card animate-pulse h-64 bg-gray-100" />}>
+      <InsightsContent />
+    </Suspense>
   );
 }
