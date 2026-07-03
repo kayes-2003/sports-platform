@@ -1,5 +1,5 @@
 const BASE = typeof window === 'undefined'
-  ? (process.env.NEXT_PUBLIC_API_URL || 'https://sports-platform-dphb.vercel.app/api')
+  ? (process.env.NEXT_PUBLIC_API_URL || 'https://sports-platform-qbxi.vercel.app/api')
   : (process.env.NEXT_PUBLIC_API_URL || '/api');
 
 function getToken(): string | null {

@@ -47,7 +47,7 @@ function AuthContent() {
     }
     setLoading(true);
     try {
-      const BASE = process.env.NEXT_PUBLIC_API_URL || 'https://sports-platform-dphb.vercel.app/api';
+      const BASE = process.env.NEXT_PUBLIC_API_URL || 'https://sports-platform-qbxi.vercel.app/';
       const res = await fetch(`${BASE}/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
